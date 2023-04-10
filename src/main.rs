@@ -9,7 +9,7 @@ pub mod flood_fill;
 use crate::flood_fill::flood_fill;
 
 fn main() {
-    let file_path = "../test.txt";
+    let file_path = "../input.txt";
     let path = Path::new(file_path);
     let file = File::open(path).unwrap();
     let cubes: Vec<[usize; 3]> = io::BufReader::new(file)
@@ -36,7 +36,7 @@ fn main() {
     let shape: [usize; 3] = maxs
         .iter()
         .zip(mins.iter())
-        .map(|(max, min)| max - min + 1 + padding)
+        .map(|(max, min)| max - min + 1 + 2*padding)
         .collect::<Vec<_>>()
         .try_into()
         .unwrap();
@@ -52,7 +52,7 @@ fn main() {
                 .unwrap()
         })
         .collect();
-    let formation_color = 1;
+    let formation_color = 1u8;
     for &coordinate in coordinates.iter() {
         space[coordinate] = formation_color;
     }
@@ -79,7 +79,7 @@ fn main() {
 
     //part 2
     let outside_color = 2;
-    flood_fill(&mut space, vec![[0; 3]], outside_color, |coordinate| {
+    flood_fill(&mut space, [0; 3], outside_color, |coordinate| {
         get_neighbors(coordinate, &cardinals)
     });
     let outside_coordinates: Vec<_> = space
@@ -98,13 +98,13 @@ fn main() {
         })
         .count();
     // println!("occupied_neighbors_count = {}", occupied_neighbors_count);
-    //let outside_surface = 2 * (shape[0] * shape[1] + shape[0] * shape[2] + shape[1] * shape[2]);
+    let outside_surface = 2 * (shape[0] * shape[1] + shape[0] * shape[2] + shape[1] * shape[2]);
     // println!("outside_surface = {}", outside_surface);
-    let surface_area = outside_coordinates.into_iter().count() * 6 - occupied_neighbors_count;
+    let surface_area = outside_coordinates.into_iter().count() * 6 - occupied_neighbors_count - outside_surface;
     println!("Part 2: {}", surface_area);
 }
 
-fn get_neighbors(coordinate: &[usize; 3], steps: &Vec<[i32; 3]>) -> Vec<[usize; 3]> {
+fn get_neighbors(coordinate: &[usize; 3], steps: &[[i32; 3]]) -> Vec<[usize; 3]> {
     steps
         .iter()
         .filter_map::<[usize; 3], _>(move |step| {
